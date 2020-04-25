@@ -1,0 +1,70 @@
+How to update a contract package
+
+In contract repository:
+	1) Create feature branch off of develop
+		a) Make some changes
+		b) Commit and push work
+
+	2) "Develop" & "Feature/*" branches will automatically run CI build for feature branch
+		a) Go to 'Builds' in Azure DevOps - https://liazon.visualstudio.com/BrightChoices/_build?definitionId=516
+		b) Search for CI build for contract
+			1) Confirm build succeeded
+
+		b) ** This automatically creates 'Unstable' package in MyGet Dev Feed 
+			- Go to https://liazon.myget.org/feed/packages/dev/
+			- Search for specific contract package to verify new package version
+				- ex.) 1.1.0-inc-feature-branch-name-000
+	
+	3) Merge feature branch into develop
+		a) Merge:
+			1) git checkout develop 
+			2) git pull
+			3) git merge "feature branch"
+			4) git push
+
+			or  **Make a pull request to merge feature branch into develop
+
+		b) ** This automatically creates 'Alpha' package in MyGet Dev Feed 
+			- Go to https://liazon.myget.org/feed/packages/dev/	
+			- Search for specific contract package to verify new package version
+				- ex.) 1.1.0-alpha000	
+
+	4) Create "next major version" release branch 
+		a) Use gitversion to get next valid major version (such as 1.1.0)
+		b) Use GitFlow to create a release branch
+			- ex.) release/1.1.0
+		c) Right click the branch name and click "Publish"
+
+or instead of 4th step -> from develop create a new branch of name release/1.0.0 and then publish that from the gitflow/push it
+			
+
+	5) Manually run Integration build for release branch
+		a) Go to 'Builds' in Azure DevOps - https://liazon.visualstudio.com/BrightChoices/_build?definitionId=516
+https://liazon.visualstudio.com/BrightChoices/_build?definitionId=933
+		b) Search for Integration build for contract
+			1) Confirm configuration
+			2) Point to feature branch
+			3) Queue new build
+			4) Confirm build succeeded
+
+		b) ** This automatically creates 'Beta' package in MyGet Integration Feed
+			- Go to https://liazon.myget.org/feed/packages/integration/
+			- Search for specific contract package to verify new package version
+				- ex.) 1.1.0-beta0000
+	6) Use GitFlow to Complete the release
+		- ex.) tag the release with the version '1.1.0'	
+	
+	7) Promote MyGet package to release feed
+		- Confirm new stable package is in release feed 
+			- Go to https://liazon.myget.org/feed/packages/release
+			- Search for specific contract package to verify new package version	
+
+	8) Complete GitFlow release - Click on "Finish Release" in VSTS
+check delete branch and push to remote
+		- Automatically merges release branch into master
+		- Automatically merges release branch into develop
+		- Automatically adds tags
+
+To test package updates in the Monolith: 
+	1) Update paket.dependencies with appropriate package version
+	2) Run Paket install to update the packet.lock
